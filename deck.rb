@@ -29,10 +29,3 @@ class Deck
     attr_accessor :card_types, :card_values
   end
 end
-
-deck = Deck.new
-puts deck.inspect
-puts deck.cards[3].inspect
-
-deck.print
-puts deck.cards.count
