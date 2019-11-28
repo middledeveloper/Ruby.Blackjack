@@ -21,10 +21,6 @@ class Deck
     end
   end
 
-  def print
-    puts @cards.inspect
-  end
-
   class << self
     attr_accessor :card_types, :card_values
   end
