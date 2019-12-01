@@ -1,26 +1,46 @@
 # frozen_string_literal: true
 
 require_relative 'game'
-go = true
+play = true
 
 puts '*** Добро пожаловать в игру RUBY Blackjack! ***'
 print 'Укажите Ваше имя: '
 
-player_name = gets.chomp
-
 game = Game.new
-game.add_player(Player.new(player_name))
+game.add_player(Player.new(gets.chomp))
+dealer = game.players[0]
+player = game.players[1]
 
-while go
-  game.players[0].cards = []
-  game.players[1].cards = []
+while play
+  puts 'Новая игра началась!'
+  dealer.cards = []
+  player.cards = []
   game.deck = Deck.new
   game.debiting_players
   game.give_two_cards_each_player
-  gamer_score = game.player_score(game.players[1])
-  puts "#{player_name}, Ваши карты: #{game.show_cards(game.players[1])} " \
-  "(сумма очков: #{gamer_score})"
 
-  # print '..end'
-  # gets.chomp
+  game.player_cards_info(player)
+
+  if game.players_has_three_cards?
+    game.open_cards
+    game.game_result
+    play = game.restart_game?
+  end
+
+  case game.player_progress
+  when 1
+    game.dealer_progress
+  when 2
+    game.give_card(player)
+    game.player_cards_info(player)
+    game.dealer_progress
+  when 3
+    game.open_cards
+    game.game_result
+    play = game.restart_game?
+  end
+
 end
+
+puts '*** Спасибо за игру, возвращайтесь! ***'
+exit
