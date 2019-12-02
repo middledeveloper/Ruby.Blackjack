@@ -83,8 +83,6 @@ class Game
       puts 'Дилер взял карту!'
       give_card(players[0])
     end
-
-    player_progress
   end
 
   def players_has_three_cards?
@@ -100,20 +98,31 @@ class Game
   def game_result
     dealer_score = player_score(players[0])
     player_score = player_score(players[1])
-
-    if dealer_score > player_score
-      fund_player(players[0], bank)
-      puts "Победил игрок #{players[0].name}!"
-    elsif dealer_score < player_score
-      fund_player(players[1], bank)
-      puts "Победил игрок #{players[1].name}!"
+    winner = define_winner(dealer_score, player_score)
+    if winner.nil?
+      puts 'У нас ничья!'
+      players.each { |player| fund_player(player, 10) }
+      puts 'Возвращаем ставки игрокам!'
     else
-      fund_player(players[0], 10)
-      fund_player(players[1], 10)
-      puts 'В этот раз ничья!'
+      puts "#{winner.name} побеждает!"
+      fund_player(winner, bank)
+      puts "#{winner.name} богатеет, на счету $#{winner.money}!"
     end
 
     bank = 0
+  end
+
+  def define_winner(dealer_score, player_score)
+    limit = 21
+    if dealer_score > limit || player_score > limit
+      return players[0] if player_score > limit && dealer_score <= limit
+      return players[1] if dealer_score > limit && player_score <= limit
+      return nil if player_score > limit && dealer_score > limit
+    else
+      return players[0] if dealer_score > player_score
+      return players[1] if player_score > dealer_score
+      return nil if dealer_score == player_score
+    end
   end
 
   def fund_player(player, money)
