@@ -28,7 +28,7 @@ class Game
       player.cards.push(card)
       deck.cards.delete(card)
     else
-      puts 'У Вас максимальное количество карт!'
+      UI.cards_max
     end
   end
 
@@ -71,16 +71,15 @@ class Game
   end
 
   def player_progress
-    puts 'Ход игрока:'
-    print '1 = Пропустить; 2 = Взять карту; 3 = Открыться: '
+    UI.player_progress
     gets.chomp.to_i
   end
 
   def dealer_progress
     if player_score(players[0]) > 16 || players[0].cards.count > 2
-      puts 'Дилер пропустил ход!'
+      UI.dealer_passed
     else
-      puts 'Дилер взял карту!'
+      UI.dealer_got_card
       give_card(players[0])
     end
   end
@@ -100,13 +99,11 @@ class Game
     player_score = player_score(players[1])
     winner = define_winner(dealer_score, player_score)
     if winner.nil?
-      puts 'У нас ничья!'
+      UI.draw
       players.each { |player| fund_player(player, 10) }
-      puts 'Возвращаем ставки игрокам!'
     else
-      puts "#{winner.name} побеждает!"
       fund_player(winner, bank)
-      puts "#{winner.name} богатеет, на счету $#{winner.money}!"
+      UI.winner(winner.name, winner.money)
     end
 
     bank = 0
@@ -130,7 +127,7 @@ class Game
   end
 
   def restart_game?
-    print 'Сыграем еще раз? 1 = Да; 0 = Нет: '
+    UI.play_again
     return true if gets.chomp.to_i == 1
 
     false

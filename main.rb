@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
+require_relative 'ui'
 require_relative 'game'
 
-puts '*** Добро пожаловать в игру RUBY Blackjack! ***'
-print 'Укажите Ваше имя: '
+UI.greetings
 
 game = Game.new
 game.add_player(Player.new(gets.chomp))
@@ -13,11 +13,18 @@ game.deck = Deck.new
 
 play = true
 while play
-  puts 'Новая игра началась!'
+  UI.start
 
   if game.deck.cards.count < 5
-    puts "Карт в колоде мало (#{game.deck.cards.count}шт.), пора заканчивать!"
+    UI.no_cards(game.deck.cards.count)
     break
+  end
+
+  game.players.each do |player|
+    if player.money == 0
+      UI.no_money(player.name)
+      break
+    end
   end
 
   game.bank = 0
@@ -55,5 +62,5 @@ while play
   play = game.restart_game?
 end
 
-puts '*** Спасибо за игру, возвращайтесь! ***'
+UI.end
 exit
