@@ -4,7 +4,11 @@ class UI
   class << self
     def greetings
       puts '*** Добро пожаловать в игру RUBY Blackjack! ***'
+    end
+
+    def add_player
       print 'Укажите Ваше имя: '
+      gets.chomp
     end
 
     def start
@@ -23,9 +27,10 @@ class UI
       puts 'У Вас максимальное количество карт!'
     end
 
-    def player_progress
+    def player_turn
       puts 'Ход игрока:'
       print '1 = Пропустить; 2 = Взять карту; 3 = Открыться: '
+      gets.chomp.to_i
     end
 
     def dealer_passed
@@ -34,6 +39,10 @@ class UI
 
     def dealer_got_card
       puts 'Дилер взял карту!'
+    end
+
+    def show_hand(hand_string)
+      puts "Ваши карты: #{hand_string}"
     end
 
     def draw
@@ -46,6 +55,7 @@ class UI
 
     def play_again
       print 'Сыграем еще раз? 1 = Да; 0 = Нет: '
+      gets.chomp.to_i
     end
 
     def end

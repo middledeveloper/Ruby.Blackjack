@@ -1,53 +1,34 @@
 # frozen_string_literal: true
 
-require_relative 'ui'
 require_relative 'game'
 
-UI.greetings
-
 game = Game.new
-game.add_player(Player.new(gets.chomp))
+game.add_player
+
 dealer = game.players[0]
 player = game.players[1]
 game.deck = Deck.new
 
 play = true
 while play
-  UI.start
+  break unless game.enough_cards?
+  break unless game.enough_money?
 
-  if game.deck.cards.count < 5
-    UI.no_cards(game.deck.cards.count)
-    break
-  end
-
-  game.players.each do |player|
-    if player.money == 0
-      UI.no_money(player.name)
-      break
-    end
-  end
-
-  game.bank = 0
-  dealer.cards = []
-  player.cards = []
-  game.debiting_players
-  game.give_two_cards_each_player
-
-  game.player_cards_info(player)
+  game.start
 
   play_round = true
   while play_round
 
-    if game.players_has_three_cards?
+    if game.all_has_three?
       game.open_cards
       game.game_result
       play_round = false
       break
     end
 
-    case game.player_progress
+    case game.player_turn
     when 1
-      game.dealer_progress
+      game.dealer_turn
     when 2
       game.give_card(player)
       game.player_cards_info(player)
@@ -62,5 +43,4 @@ while play
   play = game.restart_game?
 end
 
-UI.end
 exit

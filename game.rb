@@ -2,96 +2,73 @@
 
 require_relative 'card'
 require_relative 'deck'
+require_relative 'bank'
 require_relative 'player'
+require_relative 'ui'
 
 class Game
   attr_reader :players
   attr_accessor :deck, :bank
 
   def initialize
-    @bank = 0
-    (@players ||= []).push(Player.new('Dealer'))
+    @players = [Player.new('Дилер')]
+    @bank = Bank.new
     @deck = Deck.new
   end
 
-  def add_player(player)
-    players.push(player)
+  def add_player
+    players.push(Player.new(UI.add_player))
   end
 
-  def give_two_cards_each_player
-    players.each { |player| 2.times { give_card(player) } }
-  end
-
-  def give_card(player)
-    if player.cards.count < 3
-      card = deck.cards[rand(0...deck.cards.count)]
-      player.cards.push(card)
-      deck.cards.delete(card)
-    else
-      UI.cards_max
-    end
-  end
-
-  def debiting_players
+  def start
     players.each do |player|
-      player.money -= 10
-      self.bank += 10
-    end
-  end
-
-  def show_cards(player)
-    cards = ''
-    player.cards.each { |card| cards += "#{card.value}#{card.type} " }
-    cards
-  end
-
-  def player_score(player)
-    score = 0
-    ten_points_values = %w[J Q K]
-    player.cards.each do |card|
-      score += if ten_points_values.include? card.value
-                 10
-               elsif card.value == 'A'
-                 if score + 11 <= 21
-                   11
-                 else
-                   1
-                 end
-               else
-                 card.value.to_i
-               end
+      2.times { player.hand.give_card(deck) }
+      bank.take(player, 10)
     end
 
-    score
+    UI.start
+    UI.show_hand(players[1].hand.show)
   end
 
-  def player_cards_info(player)
-    puts "#{player.name}, Ваши карты: #{show_cards(player)} " \
-    "(сумма очков: #{player_score(player)})"
-  end
-
-  def player_progress
-    UI.player_progress
-    gets.chomp.to_i
-  end
-
-  def dealer_progress
-    if player_score(players[0]) > 16 || players[0].cards.count > 2
-      UI.dealer_passed
-    else
-      UI.dealer_got_card
-      give_card(players[0])
+  def enough_cards?
+    if deck.cards.count < 5
+      UI.no_cards(deck.cards.count)
+      return false
     end
+
+    true
   end
 
-  def players_has_three_cards?
-    return true if players[0].cards.count > 2 && players[1].cards.count > 2
+  def enough_money?
+    players.each do |player|
+      if player.money == 0
+        UI.no_money(player.name)
+        return false
+      end
+    end
+
+    true
+  end
+
+  def all_has_three?
+    count = players.count { |player| player.hand.cards.count == 3 }
+    return true if count > 1
 
     false
   end
 
-  def open_cards
-    players.each { |player| player_cards_info(player) }
+  def player_turn
+    UI.player_turn
+  end
+
+  def dealer_turn
+    if player_score(players[0]) > 16 || players[0].items.count > 2
+      UI.dealer_passed
+    else
+      UI.dealer_got_card
+      random_card = Card.take(deck)
+      random_card.give(players[0].hand)
+    end
   end
 
   def game_result
@@ -103,7 +80,7 @@ class Game
       players.each { |player| fund_player(player, 10) }
     else
       fund_player(winner, bank)
-      UI.winner(winner.name, winner.money)
+      UI.winner(winner.name, winner.count)
     end
 
     bank = 0
@@ -122,13 +99,8 @@ class Game
     end
   end
 
-  def fund_player(player, money)
-    player.money += money
-  end
-
   def restart_game?
-    UI.play_again
-    return true if gets.chomp.to_i == 1
+    return true if UI.play_again == 1
 
     false
   end
