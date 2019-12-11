@@ -8,7 +8,7 @@ class UI
 
     def add_player
       print 'Укажите Ваше имя: '
-      gets.chomp
+      gets.chomp.capitalize
     end
 
     def start
@@ -27,6 +27,10 @@ class UI
       puts 'У Вас максимальное количество карт!'
     end
 
+    def three_cards
+      puts 'У обоих игроков максимальное количество карт, открываемся!'
+    end
+
     def player_turn
       puts 'Ход игрока:'
       print '1 = Пропустить; 2 = Взять карту; 3 = Открыться: '
@@ -41,16 +45,16 @@ class UI
       puts 'Дилер взял карту!'
     end
 
-    def show_hand(hand_string)
-      puts "Ваши карты: #{hand_string}"
+    def show_hand(player_name, cards_view)
+      puts "Карты игрока #{player_name}: #{cards_view}"
     end
 
     def draw
       puts 'Ничья! Возвращаем ставки игрокам!'
     end
 
-    def winner(name, money)
-      puts "#{name} побеждает, теперь на счету $#{money}!"
+    def winner(name, score, money)
+      puts "#{name} побеждает (#{score} оч.), теперь на счету $#{money}!"
     end
 
     def play_again

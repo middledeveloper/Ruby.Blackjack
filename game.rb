@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
+require_relative 'bank'
 require_relative 'card'
 require_relative 'deck'
-require_relative 'bank'
 require_relative 'player'
 require_relative 'ui'
 
@@ -14,20 +14,51 @@ class Game
     @players = [Player.new('Дилер')]
     @bank = Bank.new
     @deck = Deck.new
-  end
 
-  def add_player
-    players.push(Player.new(UI.add_player))
+    @players.push(Player.new(UI.add_player))
   end
 
   def start
     players.each do |player|
-      2.times { player.hand.give_card(deck) }
+      player.hand.cards = []
       bank.take(player, 10)
+
+      2.times { player.hand.give_card(deck) }
     end
 
     UI.start
-    UI.show_hand(players[1].hand.show)
+    open_player(players[1])
+  end
+
+  def play_round
+    if all_has_three?
+      UI.three_cards
+      open
+      result
+      return false
+    end
+
+    case player_turn
+    when 1
+      dealer_turn
+      return true
+    when 2
+      if players[1].hand.cards.count < 3
+        players[1].hand.give_card(deck)
+      else
+        UI.cards_max
+    end
+
+      view = players[1].hand.show
+      UI.show_hand(players[1].name, view)
+
+      dealer_turn
+      return true
+    when 3
+      open
+      result
+      return false
+    end
   end
 
   def enough_cards?
@@ -62,46 +93,53 @@ class Game
   end
 
   def dealer_turn
-    if player_score(players[0]) > 16 || players[0].items.count > 2
+    if players[0].hand.score > 16 || players[0].hand.cards.count > 2
       UI.dealer_passed
     else
       UI.dealer_got_card
-      random_card = Card.take(deck)
-      random_card.give(players[0].hand)
+      players[0].hand.give_card(deck)
     end
   end
 
-  def game_result
-    dealer_score = player_score(players[0])
-    player_score = player_score(players[1])
-    winner = define_winner(dealer_score, player_score)
+  def open
+    players.each do |player|
+      open_player(player)
+    end
+  end
+
+  def open_player(player)
+    view = player.hand.show
+    UI.show_hand(player.name, view)
+  end
+
+  def result
+    winner = define_winner(players[0].hand.score, players[1].hand.score)
     if winner.nil?
       UI.draw
-      players.each { |player| fund_player(player, 10) }
+      players.each { |player| bank.give(player, 10) }
     else
-      fund_player(winner, bank)
-      UI.winner(winner.name, winner.count)
+      bank.give(winner, bank.money)
+      UI.winner(winner.name, winner.hand.score, winner.money)
     end
-
-    bank = 0
   end
 
-  def define_winner(dealer_score, player_score)
+  def define_winner(p1_score, p2_score)
     limit = 21
-    if dealer_score > limit || player_score > limit
-      return players[0] if player_score > limit && dealer_score <= limit
-      return players[1] if dealer_score > limit && player_score <= limit
-      return nil if player_score > limit && dealer_score > limit
+    if p1_score > limit || p2_score > limit
+      return players[0] if p2_score > limit && p1_score <= limit
+      return players[1] if p1_score > limit && p2_score <= limit
+      return nil if p2_score > limit && p1_score > limit
     else
-      return players[0] if dealer_score > player_score
-      return players[1] if player_score > dealer_score
-      return nil if dealer_score == player_score
+      return players[0] if p1_score > p2_score
+      return players[1] if p2_score > p1_score
+      return nil if p1_score == p2_score
     end
   end
 
   def restart_game?
     return true if UI.play_again == 1
 
+    UI.end
     false
   end
 end
