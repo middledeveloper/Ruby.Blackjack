@@ -34,14 +34,18 @@ class Hand
       end
     end
 
-    if a_count > 0
-      max_score_with_a = hand_score + 11 + ((a_count - 1) * 1)
-      min_score_with_a = hand_score + 1 + ((a_count - 1) * 1)
-      return max_score_with_a if max_score_with_a <= 21
+    score_with_a(a_count, hand_score)
+  end
 
-      return min_score_with_a
+  def score_with_a(a_count, score)
+    if a_count.positive?
+      max_with_a = score + 11 + ((a_count - 1) * 1)
+      min_with_a = score + 1 + ((a_count - 1) * 1)
+      return max_with_a if max_with_a <= 21
+
+      min_with_a
     else
-      return hand_score
+      score
     end
   end
 end

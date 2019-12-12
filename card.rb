@@ -3,6 +3,9 @@
 class Card
   attr_reader :value, :type
 
+  TYPES = ["\u2660", "\u2665", "\u2666", "\u2663"].freeze
+  VALUES = (2..10).to_a.push('J', 'Q', 'K', 'A').freeze
+
   def initialize(value, type)
     @value = value
     @type = type

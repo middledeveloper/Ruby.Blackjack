@@ -6,7 +6,6 @@ game = Game.new
 
 play = true
 while play
-  puts game.deck.cards.count
   break unless game.enough_cards?
   break unless game.enough_money?
 

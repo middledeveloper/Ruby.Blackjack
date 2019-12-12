@@ -1,0 +1,23 @@
+Style/Documentation:
+  Enabled: false
+
+Style/GuardClause:
+  Enabled: false
+
+Metrics/CyclomaticComplexity:
+  Enabled: false
+
+Metrics/ClassLength:
+  Enabled: true
+  Exclude:
+    - ./game.rb
+
+Metrics/MethodLength:
+  Enabled: true
+  Max: 15
+
+Metrics/AbcSize:
+  Enabled: false
+
+Metrics/PerceivedComplexity:
+  Enabled: false

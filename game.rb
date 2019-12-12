@@ -23,41 +23,35 @@ class Game
       player.hand.cards = []
       bank.take(player, 10)
 
-      2.times { player.hand.give_card(deck) }
+      2.times { take_card(player) }
     end
 
     UI.start
-    open_player(players[1])
+    open_cards(players[1])
   end
 
   def play_round
-    if all_has_three?
-      UI.three_cards
-      open
-      result
-      return false
-    end
+    return false if all_has_three?
 
     case player_turn
     when 1
       dealer_turn
-      return true
     when 2
-      if players[1].hand.cards.count < 3
-        players[1].hand.give_card(deck)
-      else
-        UI.cards_max
-    end
-
-      view = players[1].hand.show
-      UI.show_hand(players[1].name, view)
+      take_card(players[1])
+      open_cards(players[1])
 
       dealer_turn
-      return true
     when 3
-      open
-      result
+      game_result
       return false
+    end
+  end
+
+  def take_card(player)
+    if player.hand.cards.count < 3
+      player.hand.give_card(deck)
+    else
+      UI.cards_max
     end
   end
 
@@ -72,7 +66,7 @@ class Game
 
   def enough_money?
     players.each do |player|
-      if player.money == 0
+      if player.money.zero?
         UI.no_money(player.name)
         return false
       end
@@ -83,7 +77,11 @@ class Game
 
   def all_has_three?
     count = players.count { |player| player.hand.cards.count == 3 }
-    return true if count > 1
+    if count > 1
+      UI.three_cards
+      game_result
+      return true
+    end
 
     false
   end
@@ -97,22 +95,24 @@ class Game
       UI.dealer_passed
     else
       UI.dealer_got_card
-      players[0].hand.give_card(deck)
+      take_card(players[0])
     end
+
+    true
   end
 
   def open
     players.each do |player|
-      open_player(player)
+      open_cards(player)
     end
   end
 
-  def open_player(player)
+  def open_cards(player)
     view = player.hand.show
     UI.show_hand(player.name, view)
   end
 
-  def result
+  def finish
     winner = define_winner(players[0].hand.score, players[1].hand.score)
     if winner.nil?
       UI.draw
@@ -121,6 +121,11 @@ class Game
       bank.give(winner, bank.money)
       UI.winner(winner.name, winner.hand.score, winner.money)
     end
+  end
+
+  def game_result
+    open
+    finish
   end
 
   def define_winner(p1_score, p2_score)
